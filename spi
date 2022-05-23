@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/queue.h>
+
+#define ITEM_COUNT 10
+
+#define LABEL "label"
+
+#define MALLOC(ptr,size) \
+	do {  \
+		ptr=malloc(size);	\
+		if (!ptr)		\
+			abort();	\
+	}while(0)
+
+#define FREE(ptr) \
+	do {	\
+		free(ptr);	\
+		ptr=NULL;	\
+	}while(0)
+
+typedef struct node {
+	char *label;
+	int order;
+	STAILQ_ENTRY(node) link;
+}node_t;
+
+static STAILQ_HEAD(head, node) node_list=STAILQ_HEAD_INITIALIZER(node_list);
+
+void process() {
+	printf("Creating queue\n");
+	node_t *entry;
+
+	for(int i=0;i<ITEM_COUNT;i++) {
+		MALLOC(entry, sizeof(node_t));
+		asprintf(&entry->label, " %s %d", LABEL, i);
+		entry->order=i;
+		STAILQ_INSERT_TAIL(&node_list, entry, link);
+	}
+
+	printf("Queue is filled with %d element\n", ITEM_COUNT);
+	while (!STAILQ_EMPTY(&node_list)) {
+		entry = STAILQ_FIRST(&node_list);
+		STAILQ_REMOVE(&node_list, entry, node, link);
+		printf("dequeue element is %s %d\n", entry->label, entry->order);
+		FREE(entry);
+	}
+
+	printf("Queue is empty\n");
+
+}
+
+int main(int argc, char **argv) {
+	process();
+}
+
